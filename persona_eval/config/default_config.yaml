@@ -1,0 +1,194 @@
+# Persona Evaluation Framework - Default Configuration
+# ====================================================
+# This config defines datasets, models, conditions, and output settings
+# for evaluating the effect of personas on LLM performance.
+
+# Datasets Configuration
+# ----------------------
+# Each dataset must have a questions.jsonl file with the following schema:
+# {
+#   "id": "unique_id",
+#   "question_text": "...",
+#   "options": ["A. ...", "B. ...", ...],
+#   "correct_option_letter": "A",
+#   "correct_answer_text": "...",  # optional, for open-ended
+#   "subject": "physics",           # optional
+#   "difficulty": "post-grad",      # optional
+#   "metadata": {}                  # optional
+# }
+
+datasets:
+  - name: gpqa
+    path: "data/gpqa/questions.jsonl"
+    type: "mcq"
+    options_are_letters: true
+  - name: mmlu_pro
+    path: "data/mmlu_pro/questions.jsonl"
+    type: "mcq"
+    options_are_letters: true
+
+# Models Configuration
+# --------------------
+# Supported providers: openai, anthropic, openrouter
+# Environment variables required:
+#   - OPENAI_API_KEY for OpenAI models
+#   - ANTHROPIC_API_KEY for Anthropic models
+#   - OPENROUTER_API_KEY for OpenRouter models
+
+models:
+  # OpenAI Models
+  - id: "gpt-4o"
+    provider: "openai"
+    model_name: "gpt-4o"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "gpt-4o-mini"
+    provider: "openai"
+    model_name: "gpt-4o-mini"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "o3-mini"
+    provider: "openai"
+    model_name: "o3-mini"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  # Anthropic Models
+  - id: "claude-3-5-sonnet"
+    provider: "anthropic"
+    model_name: "claude-3-5-sonnet-20241022"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "claude-3-5-haiku"
+    provider: "anthropic"
+    model_name: "claude-3-5-haiku-20241022"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "claude-3-opus"
+    provider: "anthropic"
+    model_name: "claude-3-opus-20240229"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  # OpenRouter Models (can access many providers via single API)
+  - id: "openrouter-gpt-4o"
+    provider: "openrouter"
+    model_name: "openai/gpt-4o"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "openrouter-claude-3-5-sonnet"
+    provider: "openrouter"
+    model_name: "anthropic/claude-3.5-sonnet"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "openrouter-llama-3-70b"
+    provider: "openrouter"
+    model_name: "meta-llama/llama-3-70b-instruct"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "openrouter-mixtral-8x22b"
+    provider: "openrouter"
+    model_name: "mistralai/mixtral-8x22b-instruct"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+  - id: "openrouter-gemini-pro"
+    provider: "openrouter"
+    model_name: "google/gemini-pro-1.5"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+# Sampling Configuration
+# ----------------------
+sampling:
+  num_samples_per_question: 25
+  temperature: 1.0
+  max_tokens_reasoning: 1024
+
+# Judge Configuration
+# -------------------
+# The judge model evaluates open-ended answers for correctness
+judge:
+  enabled: true
+  judge_model_id: "gpt-4o"
+  temperature: 0.0
+  max_tokens: 512
+
+# Experimental Conditions
+# -----------------------
+# Six conditions testing different persona and reasoning combinations:
+# 1. baseline_mc: No persona, MCQ, short answer
+# 2. shallow_persona_mc: Expert tag (paper-style), MCQ, short answer
+# 3. deep_persona_mc_preamble: Rich expert persona, MCQ, long reasoning
+# 4. deep_persona_open: Rich expert persona, open-ended, long reasoning
+# 5. process_only_open: No persona, open-ended, long reasoning
+# 6. low_knowledge_persona_deep: Toddler persona, MCQ, long reasoning
+
+conditions:
+  # 1. Baseline-MC (no persona, MCQ, short answer)
+  - id: "baseline_mc"
+    type: "mcq"
+    persona_type: "none"
+    reasoning_mode: "short"
+    use_multiple_choice: true
+    answer_format: "the_correct_answer_is"
+
+  # 2. Shallow-Persona-MC (paper-style expert tag)
+  - id: "shallow_persona_mc"
+    type: "mcq"
+    persona_type: "expert_shallow"
+    reasoning_mode: "short"
+    use_multiple_choice: true
+    answer_format: "the_correct_answer_is"
+
+  # 3. Deep-Persona-MC-Preamble
+  - id: "deep_persona_mc_preamble"
+    type: "mcq"
+    persona_type: "expert_deep"
+    reasoning_mode: "long"
+    min_reasoning_tokens: 200
+    use_multiple_choice: true
+    answer_format: "final_answer_letter"
+
+  # 4. Deep-Persona-Open (no MC)
+  - id: "deep_persona_open"
+    type: "open"
+    persona_type: "expert_deep"
+    reasoning_mode: "long"
+    min_reasoning_tokens: 200
+    use_multiple_choice: false
+    answer_format: "final_answer_text"
+
+  # 5. Process-Only-Open (no persona, but explicit reasoning)
+  - id: "process_only_open"
+    type: "open"
+    persona_type: "none"
+    reasoning_mode: "long"
+    min_reasoning_tokens: 200
+    use_multiple_choice: false
+    answer_format: "final_answer_text"
+
+  # 6. Low-Knowledge-Persona-Deep (toddler persona, long reasoning)
+  - id: "low_knowledge_persona_deep"
+    type: "mcq"
+    persona_type: "toddler"
+    reasoning_mode: "long"
+    min_reasoning_tokens: 200
+    use_multiple_choice: true
+    answer_format: "final_answer_letter"
+
+# Output Configuration
+# --------------------
+output:
+  base_dir: "outputs"
+  raw_responses_dir: "outputs/raw_responses"
+  scored_dir: "outputs/scored"
+  summaries_dir: "outputs/summaries"
+  logs_dir: "outputs/logs"
