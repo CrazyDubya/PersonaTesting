@@ -256,13 +256,18 @@ def build_clients(models: List[ModelConfig]) -> Dict[str, LLMClient]:
 
     Returns:
         Dictionary mapping model ID to LLMClient instance.
+        
+    Note:
+        Models that fail to initialize are skipped with a warning.
+        Check the returned dictionary to see which clients were created.
     """
     clients: Dict[str, LLMClient] = {}
     for m in models:
         try:
             clients[m.id] = LLMClient(m)
+            print(f"✓ Initialized client for {m.id} ({m.provider})")
         except (ImportError, ValueError) as e:
-            print(f"Warning: Could not create client for {m.id}: {e}")
+            print(f"⚠ Warning: Could not create client for {m.id}: {e}")
     return clients
 
 

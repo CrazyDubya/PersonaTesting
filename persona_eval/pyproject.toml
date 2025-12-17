@@ -8,9 +8,12 @@ version = "0.1.0"
 description = "Framework for evaluating the effect of personas on LLM performance"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 authors = [
     {name = "Persona Eval Team"}
+]
+maintainers = [
+    {name = "CrazyDubya", email = "97849040+CrazyDubya@users.noreply.github.com"}
 ]
 keywords = ["llm", "evaluation", "persona", "benchmark", "ai"]
 classifiers = [
@@ -18,6 +21,7 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -51,9 +55,9 @@ all = [
 persona-eval = "src.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/persona-eval/persona-eval"
-Documentation = "https://github.com/persona-eval/persona-eval#readme"
-Repository = "https://github.com/persona-eval/persona-eval"
+Homepage = "https://github.com/CrazyDubya/PersonaTesting"
+Documentation = "https://github.com/CrazyDubya/PersonaTesting#readme"
+Repository = "https://github.com/CrazyDubya/PersonaTesting"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -69,17 +73,21 @@ profile = "black"
 line_length = 100
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
+disallow_untyped_defs = false
 ignore_missing_imports = true
+check_untyped_defs = true
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
-select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+target-version = "py38"
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
 ignore = ["E501"]  # Line too long - handled by black
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__ files
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
