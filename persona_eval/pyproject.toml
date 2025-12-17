@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "persona-eval"
+version = "0.1.0"
+description = "Persona-based evaluation harness for GPQA and MMLU"
+authors = [{name = "PersonaEval"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml",
+    "openai>=1.30.0",
+    "anthropic>=0.30.0",
+]
+
+[project.urls]
+Home = "https://example.com/persona-eval"
