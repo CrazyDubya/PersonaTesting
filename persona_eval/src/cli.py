@@ -127,31 +127,44 @@ Examples:
     if args.test:
         if not args.model:
             print("Error: --model is required for --test mode")
+            print("  Example: python -m src.cli --test --model gpt-4o --condition baseline_mc")
             sys.exit(1)
         if not args.condition:
             print("Error: --condition is required for --test mode")
+            print("  Example: python -m src.cli --test --model gpt-4o --condition baseline_mc")
             sys.exit(1)
 
         print(f"Running quick test: model={args.model}, condition={args.condition}")
         print(f"  Questions: {args.num_questions}, Samples: {args.num_samples}")
+        print(f"  Config: {args.config}")
 
-        results = run_quick_test(
-            config_path=args.config,
-            model_id=args.model,
-            condition_id=args.condition,
-            num_questions=args.num_questions,
-            num_samples=args.num_samples,
-        )
+        try:
+            results = run_quick_test(
+                config_path=args.config,
+                model_id=args.model,
+                condition_id=args.condition,
+                num_questions=args.num_questions,
+                num_samples=args.num_samples,
+            )
+        except FileNotFoundError as e:
+            print(f"\nError: {e}")
+            sys.exit(1)
+        except ValueError as e:
+            print(f"\nConfiguration Error: {e}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"\nUnexpected Error: {type(e).__name__}: {e}")
+            sys.exit(1)
 
         if "error" in results:
-            print(f"Error: {results['error']}")
+            print(f"\nError: {results['error']}")
             sys.exit(1)
 
         print(f"\nResults:")
         print(f"  Accuracy: {results['accuracy']:.2%}")
         print(f"\nDetailed results:")
         for r in results["results"]:
-            correct_str = "CORRECT" if r.get("is_correct") else "WRONG"
+            correct_str = "✓ CORRECT" if r.get("is_correct") else "✗ WRONG"
             print(f"  Q{r['question_id']}: predicted={r['predicted_option_letter']}, "
                   f"correct={r['correct_letter']}, {correct_str}")
             if r.get("raw_response"):
@@ -171,14 +184,30 @@ Examples:
     if conditions_filter:
         print(f"  Conditions: {conditions_filter}")
 
-    run_full_experiment(
-        config_path=args.config,
-        models_filter=models_filter,
-        conditions_filter=conditions_filter,
-        skip_sampling=args.skip_sampling,
-        skip_scoring=args.skip_scoring,
-        skip_existing=not args.no_skip_existing,
-    )
+    try:
+        run_full_experiment(
+            config_path=args.config,
+            models_filter=models_filter,
+            conditions_filter=conditions_filter,
+            skip_sampling=args.skip_sampling,
+            skip_scoring=args.skip_scoring,
+            skip_existing=not args.no_skip_existing,
+        )
+        print("\n✓ Experiment completed successfully!")
+    except FileNotFoundError as e:
+        print(f"\nError: {e}")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"\nConfiguration Error: {e}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\n\nExperiment interrupted by user")
+        sys.exit(130)
+    except Exception as e:
+        print(f"\nUnexpected Error: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":

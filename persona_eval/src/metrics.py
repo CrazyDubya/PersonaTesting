@@ -31,6 +31,9 @@ def compute_confidence_interval(
     """
     if n_samples == 0:
         return (0.0, 0.0)
+    
+    # Clamp accuracy to valid range
+    accuracy = max(0.0, min(1.0, accuracy))
 
     # Z-score for confidence level
     z_scores = {0.90: 1.645, 0.95: 1.96, 0.99: 2.576}

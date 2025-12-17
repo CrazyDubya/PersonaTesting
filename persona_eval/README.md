@@ -17,19 +17,28 @@ This project evaluates how different persona prompts affect LLM accuracy on chal
 
 ```bash
 # Clone the repository
-git clone https://github.com/persona-eval/persona-eval.git
-cd persona_eval
+git clone https://github.com/CrazyDubya/PersonaTesting.git
+cd PersonaTesting/persona_eval
 
-# Create virtual environment
+# Create virtual environment (recommended)
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
+# For development (includes linting, testing tools)
+pip install -r requirements-dev.txt
+
 # Or install as a package
 pip install -e .
 ```
+
+### Requirements
+
+- Python 3.8 or higher
+- At least one API key for OpenAI, Anthropic, or OpenRouter
+- Sufficient API quota for your chosen models
 
 ## Configuration
 
@@ -207,12 +216,76 @@ persona_eval/
     summaries/
 ```
 
+## Development
+
+### Running Tests
+
+```bash
+# Install dev dependencies
+pip install -r requirements-dev.txt
+
+# Run tests (when available)
+pytest tests/
+
+# Run with coverage
+pytest --cov=src tests/
+```
+
+### Code Quality
+
+```bash
+# Format code
+black src/
+isort src/
+
+# Lint code
+ruff check src/
+
+# Type checking
+mypy src/
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **API Key Not Set**: Make sure environment variables are exported in your current shell
+   ```bash
+   echo $OPENAI_API_KEY  # Should print your key
+   ```
+
+2. **Config File Not Found**: Run from the `persona_eval` directory or provide absolute path
+   ```bash
+   python -m src.cli --config /absolute/path/to/config.yaml
+   ```
+
+3. **Empty Responses**: Check API quota and model availability. Enable verbose logging.
+
+4. **JSONL Parse Errors**: Validate your question files have proper JSON formatting (one object per line)
+
+### Performance Tips
+
+- Use `--skip-existing` to avoid re-running completed samples
+- Start with `--test` mode to validate config before full runs
+- Filter to specific models/conditions during development
+- Monitor API costs, especially with large num_samples_per_question
+
 ## Notes
 
 - **Judge model**: For open-ended answers, a judge model (default: gpt-4o) evaluates correctness by comparing the model's answer to the gold answer.
 - **Retry logic**: API calls include retry logic with exponential backoff for robustness.
 - **Parallel execution**: Currently runs sequentially; can be extended for parallel sampling.
 - **Token estimation**: Reasoning token counts are approximate (based on word/character heuristics).
+- **Error handling**: The framework includes comprehensive error handling and validation to prevent crashes.
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Run linting and tests before submitting
+5. Submit a pull request with a clear description
 
 ## License
 

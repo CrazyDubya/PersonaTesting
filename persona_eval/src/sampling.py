@@ -132,14 +132,17 @@ def approximate_token_count(text: str) -> int:
     Returns:
         Approximate token count.
     """
+    if not text:
+        return 0
+    
     words = text.split()
     word_count = len(words)
     # More accurate estimate using both words and characters
     char_count = len(text)
-    word_based = int(word_count / 0.75)
+    word_based = int(word_count / 0.75) if word_count > 0 else 0
     char_based = int(char_count / 4)
     # Average the two estimates
-    return (word_based + char_based) // 2
+    return max(1, (word_based + char_based) // 2)
 
 
 def split_reasoning_and_final_answer(text: str) -> Dict[str, str]:
