@@ -30,16 +30,40 @@ def load_all_questions(datasets_config: List[Dict[str, Any]]) -> List[Question]:
 
     Returns:
         List of all questions from all datasets.
+        
+    Raises:
+        ValueError: If no questions could be loaded from any dataset.
     """
+    if not datasets_config:
+        raise ValueError("No datasets configured")
+    
     all_questions: List[Question] = []
     for ds in datasets_config:
-        dataset_name = ds["name"]
-        path = ds["path"]
-        if not os.path.exists(path):
-            print(f"Warning: Dataset file not found: {path}")
+        dataset_name = ds.get("name")
+        path = ds.get("path")
+        
+        if not dataset_name:
+            print(f"⚠ Warning: Dataset missing 'name' field, skipping")
             continue
-        questions = load_questions_from_jsonl(path, dataset_name)
-        all_questions.extend(questions)
+        if not path:
+            print(f"⚠ Warning: Dataset '{dataset_name}' missing 'path' field, skipping")
+            continue
+            
+        if not os.path.exists(path):
+            print(f"⚠ Warning: Dataset file not found: {path}")
+            continue
+            
+        try:
+            questions = load_questions_from_jsonl(path, dataset_name)
+            print(f"✓ Loaded {len(questions)} questions from {dataset_name}")
+            all_questions.extend(questions)
+        except Exception as e:
+            print(f"⚠ Warning: Failed to load dataset '{dataset_name}': {e}")
+            continue
+    
+    if not all_questions:
+        raise ValueError("No questions could be loaded from any dataset. Check dataset paths and format.")
+    
     return all_questions
 
 

@@ -55,11 +55,12 @@ def detect_refusal(text: str) -> bool:
     Returns:
         True if the response appears to be a refusal.
     """
+    if not text:
+        return False
+    
     lower = text.lower()
-    for kw in REFUSAL_KEYWORDS:
-        if kw in lower:
-            return True
-    return False
+    # Optimize by using 'any' with generator expression
+    return any(kw in lower for kw in REFUSAL_KEYWORDS)
 
 
 def build_open_judge_prompt(

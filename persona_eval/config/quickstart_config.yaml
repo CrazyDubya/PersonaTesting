@@ -1,0 +1,49 @@
+# Quick Start Configuration - Minimal setup for testing
+# ======================================================
+# This is a minimal configuration for quickly testing the framework
+# with a single model and condition.
+
+datasets:
+  - name: gpqa
+    path: "data/gpqa/questions.jsonl"
+    type: "mcq"
+    options_are_letters: true
+
+models:
+  # Single OpenAI model for quick testing
+  # Set OPENAI_API_KEY environment variable before running
+  - id: "gpt-4o-mini"
+    provider: "openai"
+    model_name: "gpt-4o-mini"
+    max_output_tokens: 1024
+    default_temperature: 1.0
+
+# Sampling Configuration - reduced for quick testing
+sampling:
+  num_samples_per_question: 5  # Reduced from 25 for faster testing
+  temperature: 1.0
+  max_tokens_reasoning: 1024
+
+# Judge Configuration
+judge:
+  enabled: true
+  judge_model_id: "gpt-4o-mini"
+  temperature: 0.0
+  max_tokens: 512
+
+# Single baseline condition for quick testing
+conditions:
+  - id: "baseline_mc"
+    type: "mcq"
+    persona_type: "none"
+    reasoning_mode: "short"
+    use_multiple_choice: true
+    answer_format: "the_correct_answer_is"
+
+# Output Configuration
+output:
+  base_dir: "outputs"
+  raw_responses_dir: "outputs/raw_responses"
+  scored_dir: "outputs/scored"
+  summaries_dir: "outputs/summaries"
+  logs_dir: "outputs/logs"

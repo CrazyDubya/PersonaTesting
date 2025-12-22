@@ -62,10 +62,14 @@ class OpenAIClient(BaseLLMClient):
                 temperature=temperature,
                 max_tokens=max_tokens,
             )
-            return response.choices[0].message.content or ""
+            content = response.choices[0].message.content
+            if content is None:
+                print(f"Warning: OpenAI returned None content for model {self.config.model_name}")
+                return ""
+            return content
         except Exception as e:
             # Log error and return empty string to avoid crashing
-            print(f"OpenAI API error: {e}")
+            print(f"OpenAI API error for model {self.config.model_name}: {type(e).__name__}: {e}")
             return ""
 
 
@@ -119,9 +123,12 @@ class AnthropicClient(BaseLLMClient):
             for block in response.content:
                 if hasattr(block, 'text'):
                     text_parts.append(block.text)
-            return "".join(text_parts)
+            result = "".join(text_parts)
+            if not result:
+                print(f"Warning: Anthropic returned empty content for model {self.config.model_name}")
+            return result
         except Exception as e:
-            print(f"Anthropic API error: {e}")
+            print(f"Anthropic API error for model {self.config.model_name}: {type(e).__name__}: {e}")
             return ""
 
 
@@ -166,9 +173,13 @@ class OpenRouterClient(BaseLLMClient):
                     "X-Title": "Persona Evaluation Framework",
                 }
             )
-            return response.choices[0].message.content or ""
+            content = response.choices[0].message.content
+            if content is None:
+                print(f"Warning: OpenRouter returned None content for model {self.config.model_name}")
+                return ""
+            return content
         except Exception as e:
-            print(f"OpenRouter API error: {e}")
+            print(f"OpenRouter API error for model {self.config.model_name}: {type(e).__name__}: {e}")
             return ""
 
 
@@ -245,13 +256,18 @@ def build_clients(models: List[ModelConfig]) -> Dict[str, LLMClient]:
 
     Returns:
         Dictionary mapping model ID to LLMClient instance.
+        
+    Note:
+        Models that fail to initialize are skipped with a warning.
+        Check the returned dictionary to see which clients were created.
     """
     clients: Dict[str, LLMClient] = {}
     for m in models:
         try:
             clients[m.id] = LLMClient(m)
+            print(f"✓ Initialized client for {m.id} ({m.provider})")
         except (ImportError, ValueError) as e:
-            print(f"Warning: Could not create client for {m.id}: {e}")
+            print(f"⚠ Warning: Could not create client for {m.id}: {e}")
     return clients
 
 
